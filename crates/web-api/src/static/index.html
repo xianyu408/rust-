@@ -1,0 +1,942 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>芯片代理系统</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --surface-2: #eef3f7;
+      --text: #17202a;
+      --muted: #627386;
+      --line: #d9e1ea;
+      --accent: #176b87;
+      --accent-2: #1f8a70;
+      --danger: #b42318;
+      --warning: #a15c07;
+      --shadow: 0 10px 30px rgba(22, 34, 45, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .shell {
+      width: min(1440px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 22px 0 28px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--accent);
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: 22px;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 3px 0 0;
+      color: var(--muted);
+    }
+
+    .tool-strip {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 28px;
+      padding: 5px 9px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--muted);
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .pill.ok {
+      border-color: rgba(31, 138, 112, 0.35);
+      color: var(--accent-2);
+      background: #f0faf6;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(360px, 0.88fr) minmax(520px, 1.12fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 54px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 750;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .panel-body {
+      padding: 16px;
+    }
+
+    .form {
+      display: grid;
+      gap: 13px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #2b3a49;
+      font-weight: 650;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      padding: 10px 11px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 152px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: rgba(23, 107, 135, 0.65);
+      box-shadow: 0 0 0 3px rgba(23, 107, 135, 0.13);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 140px;
+      gap: 12px;
+    }
+
+    .check-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface-2);
+      color: #2b3a49;
+      font-weight: 650;
+    }
+
+    .check input {
+      width: auto;
+      margin: 0;
+      box-shadow: none;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .button {
+      border: 1px solid transparent;
+      border-radius: 6px;
+      min-height: 40px;
+      padding: 9px 13px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 750;
+    }
+
+    .button.secondary {
+      background: #fff;
+      color: var(--text);
+      border-color: var(--line);
+    }
+
+    .button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .status-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .progress {
+      height: 10px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 180ms ease;
+    }
+
+    .events,
+    .artifacts {
+      display: grid;
+      gap: 8px;
+      max-height: 330px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .event {
+      display: grid;
+      gap: 4px;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .event.error {
+      border-left-color: var(--danger);
+    }
+
+    .event.warning {
+      border-left-color: var(--warning);
+    }
+
+    .event .time {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .event .message {
+      font-weight: 650;
+    }
+
+    .artifact {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      padding: 9px 10px;
+      text-align: left;
+    }
+
+    .artifact:hover {
+      border-color: rgba(23, 107, 135, 0.65);
+    }
+
+    .artifact-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 650;
+    }
+
+    .artifact-kind {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .empty {
+      color: var(--muted);
+      padding: 12px;
+      border: 1px dashed var(--line);
+      border-radius: 6px;
+      background: #fbfcfd;
+    }
+
+    #preview {
+      min-height: 300px;
+      max-height: 560px;
+      margin: 0;
+      overflow: auto;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #101820;
+      color: #e9f0f6;
+      font: 12px/1.55 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    #preview.preview-svg {
+      padding: 0;
+      background: #fff;
+    }
+
+    #preview.preview-svg svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    @media (max-width: 980px) {
+      .shell {
+        width: min(100vw - 20px, 760px);
+      }
+
+      header,
+      .layout {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      .tool-strip {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .row,
+      .check-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand">
+        <div class="brand-mark">IC</div>
+        <div>
+          <h1>芯片代理系统</h1>
+          <p class="subtitle">从提示到 RTL、仿真、网表和报告</p>
+        </div>
+      </div>
+      <div id="toolStatus" class="tool-strip" aria-label="本地 EDA 工具状态"></div>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">设计请求</h2>
+          <span id="projectMeta" class="meta">未创建项目</span>
+        </div>
+        <div class="panel-body">
+          <form id="designForm" class="form">
+            <label>
+              项目名称
+              <input id="projectName" value="alu-demo" autocomplete="off">
+            </label>
+
+            <label>
+              需求描述
+              <textarea id="prompt">设计一个 8 位 ALU，支持 add、sub、and、or、xor，生成可综合的 SystemVerilog，并包含自检 testbench。</textarea>
+            </label>
+
+            <label>
+              可选 RAG 上下文
+              <textarea id="ragContext" placeholder="在这里粘贴检索到的文档片段或设计约束。"></textarea>
+            </label>
+
+            <div class="row">
+              <label>
+                语言
+                <select id="language">
+                  <option value="systemverilog">SystemVerilog</option>
+                  <option value="verilog">Verilog</option>
+                </select>
+              </label>
+              <label>
+                修复轮数
+                <input id="repairRounds" type="number" min="0" max="8" value="2">
+              </label>
+            </div>
+
+            <div class="check-row">
+              <label class="check">
+                <input id="useYosys" type="checkbox">
+                Yosys
+              </label>
+              <label class="check">
+                <input id="generateWaveform" type="checkbox" checked>
+                波形
+              </label>
+              <label class="check">
+                <input id="generateKicad" type="checkbox">
+                KiCad 产物
+              </label>
+            </div>
+
+            <div class="actions">
+              <button id="submitBtn" class="button" type="submit">开始设计</button>
+              <button id="simulateBtn" class="button secondary" type="button">对当前产物运行</button>
+              <button id="resetBtn" class="button secondary" type="button">重置</button>
+            </div>
+
+            <div class="hint">
+              设置 ANTHROPIC_API_KEY 时后端使用 Claude；设置 OPENAI_API_KEY 时使用 OpenAI；否则使用本地回退。
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="stack">
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">作业进度</h2>
+            <span id="jobMeta" class="meta">空闲</span>
+          </div>
+          <div class="panel-body">
+            <div class="status-line">
+              <strong id="progressLabel">就绪</strong>
+              <span id="progressValue" class="meta">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div id="progressFill" class="progress-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">事件</h2>
+            <span id="eventCount" class="meta">0 条事件</span>
+          </div>
+          <div class="panel-body">
+            <div id="events" class="events">
+              <div class="empty">暂无事件。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">产物</h2>
+            <button id="refreshArtifacts" class="button secondary" type="button">刷新</button>
+          </div>
+          <div class="panel-body">
+            <div id="artifacts" class="artifacts">
+              <div class="empty">生成的 RTL、testbench、网表和报告会显示在这里。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2 id="previewTitle" class="panel-title">预览</h2>
+            <span id="previewMeta" class="meta">未选择文件</span>
+          </div>
+          <div class="panel-body">
+            <div id="preview">请选择一个产物以预览内容。</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      projectId: null,
+      jobId: null,
+      eventSource: null,
+      events: [],
+      failed: false
+    };
+
+    const els = {
+      form: document.getElementById("designForm"),
+      projectName: document.getElementById("projectName"),
+      prompt: document.getElementById("prompt"),
+      ragContext: document.getElementById("ragContext"),
+      language: document.getElementById("language"),
+      repairRounds: document.getElementById("repairRounds"),
+      useYosys: document.getElementById("useYosys"),
+      generateWaveform: document.getElementById("generateWaveform"),
+      generateKicad: document.getElementById("generateKicad"),
+      submitBtn: document.getElementById("submitBtn"),
+      simulateBtn: document.getElementById("simulateBtn"),
+      resetBtn: document.getElementById("resetBtn"),
+      projectMeta: document.getElementById("projectMeta"),
+      jobMeta: document.getElementById("jobMeta"),
+      progressLabel: document.getElementById("progressLabel"),
+      progressValue: document.getElementById("progressValue"),
+      progressFill: document.getElementById("progressFill"),
+      progressBar: document.querySelector(".progress"),
+      events: document.getElementById("events"),
+      eventCount: document.getElementById("eventCount"),
+      artifacts: document.getElementById("artifacts"),
+      refreshArtifacts: document.getElementById("refreshArtifacts"),
+      preview: document.getElementById("preview"),
+      previewTitle: document.getElementById("previewTitle"),
+      previewMeta: document.getElementById("previewMeta"),
+      toolStatus: document.getElementById("toolStatus")
+    };
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function toolLabel(name) {
+      switch (name) {
+        case "verilator":
+          return "Verilator";
+        case "iverilog":
+          return "Icarus";
+        case "yosys":
+          return "Yosys";
+        case "ngspice":
+          return "Ngspice";
+        case "kicad_cli":
+          return "KiCad CLI";
+        case "tesseract":
+          return "Tesseract";
+        default:
+          return name;
+      }
+    }
+
+    function setBusy(busy) {
+      els.submitBtn.disabled = busy;
+      els.simulateBtn.disabled = busy;
+    }
+
+    function setProgress(value, label) {
+      const clamped = Math.max(0, Math.min(100, value));
+      els.progressFill.style.width = clamped + "%";
+      els.progressValue.textContent = clamped + "%";
+      els.progressLabel.textContent = label;
+      els.progressBar.setAttribute("aria-valuenow", String(clamped));
+    }
+
+    async function requestJson(url, options = {}) {
+      const response = await fetch(url, {
+        headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+        ...options
+      });
+      const text = await response.text();
+      let body = null;
+      try {
+        body = text ? JSON.parse(text) : null;
+      } catch {
+        body = text;
+      }
+      if (!response.ok) {
+        const message = body && body.error ? body.error : response.statusText;
+        throw new Error(message);
+      }
+      return body;
+    }
+
+    async function loadHealth() {
+      try {
+        const health = await requestJson("/health");
+        const tools = health.tools || {};
+        els.toolStatus.innerHTML = Object.entries(tools)
+          .map(([name, ok]) => `<span class="pill ${ok ? "ok" : ""}">${escapeHtml(toolLabel(name))}：${ok ? "正常" : "缺失"}</span>`)
+          .join("");
+      } catch (error) {
+        els.toolStatus.innerHTML = `<span class="pill">健康检查不可用</span>`;
+      }
+    }
+
+    async function ensureProject() {
+      if (state.projectId) return state.projectId;
+      const project = await requestJson("/api/projects", {
+        method: "POST",
+        body: JSON.stringify({ name: els.projectName.value.trim() || "chip-project" })
+      });
+      state.projectId = project.id;
+      els.projectMeta.textContent = project.name;
+      return project.id;
+    }
+
+    function retrievedContext() {
+      const content = els.ragContext.value.trim();
+      if (!content) return [];
+      return [{
+        source: "ui://manual-rag-context",
+        title: "手动 RAG 上下文",
+        content
+      }];
+    }
+
+    function closeEventSource() {
+      if (state.eventSource) {
+        state.eventSource.close();
+        state.eventSource = null;
+      }
+    }
+
+    function progressFromEvent(event) {
+      const message = event.message || "";
+      if (message.includes("已排队")) return [10, "已排队"];
+      if (message.includes("已开始")) return [20, "已开始"];
+      if (message.includes("正在生成设计产物")) return [34, "正在生成 RTL"];
+      if (message.includes("设计产物已写入")) return [48, "产物已写入"];
+      if (message.includes("正在运行仿真")) return [62, "正在运行仿真"];
+      if (message.includes("已生成结构化验证分析")) return [88, "分析已完成"];
+      if (message.includes("完成：通过")) return [82, "工具通过"];
+      if (message.includes("完成：失败")) return [82, "工具失败"];
+      if (message.includes("流程完成") || message.includes("任务已完成")) return [100, "已完成"];
+      if (event.level === "error") return [100, "失败"];
+      return [Math.min(95, Number.parseInt(els.progressValue.textContent, 10) + 3 || 5), "处理中"];
+    }
+
+    function eventLevelLabel(level) {
+      switch (level) {
+        case "warning":
+          return "警告";
+        case "error":
+          return "错误";
+        case "artifact":
+          return "产物";
+        default:
+          return "信息";
+      }
+    }
+
+    function renderEvents() {
+      if (!state.events.length) {
+        els.events.innerHTML = '<div class="empty">暂无事件。</div>';
+        els.eventCount.textContent = "0 条事件";
+        return;
+      }
+
+      els.eventCount.textContent = `${state.events.length} 条事件`;
+      els.events.innerHTML = state.events.map((event) => {
+        const time = event.at ? new Date(event.at).toLocaleTimeString() : "";
+        const cls = event.level === "error" ? "error" : event.level === "warning" ? "warning" : "";
+        return `
+          <div class="event ${cls}">
+            <div class="time">${escapeHtml(time)} - ${escapeHtml(eventLevelLabel(event.level))}</div>
+            <div class="message">${escapeHtml(event.message || "")}</div>
+          </div>
+        `;
+      }).join("");
+      els.events.scrollTop = els.events.scrollHeight;
+    }
+
+    function handleJobEvent(event) {
+      state.events.push(event);
+      state.failed = state.failed || event.level === "error";
+      const [progress, label] = progressFromEvent(event);
+      setProgress(progress, label);
+      renderEvents();
+
+      const message = event.message || "";
+      if (message.includes("流程完成") || message.includes("任务已完成") || message.includes("任务失败") || event.level === "error") {
+        setBusy(false);
+        closeEventSource();
+        loadArtifacts();
+      }
+    }
+
+    function watchJob(jobId) {
+      closeEventSource();
+      state.eventSource = new EventSource(`/api/jobs/${jobId}/events`);
+      state.eventSource.addEventListener("job_event", (event) => {
+        handleJobEvent(JSON.parse(event.data));
+      });
+      state.eventSource.onerror = () => {
+        if (!state.failed) {
+          els.progressLabel.textContent = "等待事件流";
+        }
+      };
+    }
+
+    async function startDesign() {
+      const prompt = els.prompt.value.trim();
+      if (!prompt) {
+        setProgress(0, "需求不能为空");
+        return;
+      }
+
+      setBusy(true);
+      state.events = [];
+      state.failed = false;
+      renderEvents();
+      setProgress(5, "正在提交");
+
+      try {
+        const projectId = await ensureProject();
+        const job = await requestJson(`/api/projects/${projectId}/design`, {
+          method: "POST",
+          body: JSON.stringify({
+            prompt,
+            language: els.language.value,
+            target: "simulation",
+            max_repair_rounds: Number(els.repairRounds.value || 0),
+            use_yosys: els.useYosys.checked,
+            generate_waveform: els.generateWaveform.checked,
+            generate_kicad: els.generateKicad.checked,
+            retrieved_context: retrievedContext()
+          })
+        });
+        state.jobId = job.job_id;
+        els.jobMeta.textContent = `任务 ${job.job_id}`;
+        watchJob(job.job_id);
+      } catch (error) {
+        setBusy(false);
+        setProgress(100, "提交失败");
+        state.events.push({
+          level: "error",
+          message: error.message,
+          at: new Date().toISOString()
+        });
+        renderEvents();
+      }
+    }
+
+    async function runCurrentArtifacts() {
+      if (!state.projectId) {
+        await ensureProject();
+      }
+
+      setBusy(true);
+      state.events = [];
+      state.failed = false;
+      renderEvents();
+      setProgress(5, "开始仿真");
+
+      try {
+        const files = await loadArtifacts(true);
+        const rtl = files.filter((file) => file.startsWith("src/") && (file.endsWith(".sv") || file.endsWith(".v")));
+        const tb = files.filter((file) => file.startsWith("tb/") && (file.endsWith(".sv") || file.endsWith(".v")));
+        if (!rtl.length || !tb.length) {
+          throw new Error("请先生成 RTL 和 testbench 产物，再运行仿真。");
+        }
+
+        const job = await requestJson(`/api/projects/${state.projectId}/simulate`, {
+          method: "POST",
+          body: JSON.stringify({
+            rtl_files: rtl,
+            testbench_files: tb,
+            use_yosys: els.useYosys.checked,
+            generate_waveform: els.generateWaveform.checked,
+            generate_kicad: els.generateKicad.checked
+          })
+        });
+        state.jobId = job.job_id;
+        els.jobMeta.textContent = `任务 ${job.job_id}`;
+        watchJob(job.job_id);
+      } catch (error) {
+        setBusy(false);
+        setProgress(100, "仿真启动失败");
+        state.events.push({
+          level: "error",
+          message: error.message,
+          at: new Date().toISOString()
+        });
+        renderEvents();
+      }
+    }
+
+    function artifactKind(file) {
+      if (file.endsWith(".sv") || file.endsWith(".v")) return "RTL";
+      if (file.endsWith(".vcd") || file.endsWith(".fst")) return "波形";
+      if (file.endsWith(".svg") || file.endsWith(".dot")) return "门级图";
+      if (file.endsWith(".json") || file.endsWith(".md")) return "报告";
+      if (file.endsWith(".kicad_sch")) return "KiCad";
+      if (file.endsWith(".ps1")) return "脚本";
+      return "文件";
+    }
+
+    async function loadArtifacts(returnOnly = false) {
+      if (!state.projectId) {
+        if (!returnOnly) {
+          els.artifacts.innerHTML = '<div class="empty">尚未创建项目。</div>';
+        }
+        return [];
+      }
+
+      const result = await requestJson(`/api/projects/${state.projectId}/artifacts`);
+      const files = (result.files || []).sort();
+      if (returnOnly) return files;
+
+      if (!files.length) {
+        els.artifacts.innerHTML = '<div class="empty">暂无产物。</div>';
+        return files;
+      }
+
+      els.artifacts.innerHTML = files.map((file) => `
+        <button class="artifact" type="button" data-path="${escapeHtml(file)}">
+          <span class="artifact-name">${escapeHtml(file)}</span>
+          <span class="artifact-kind">${escapeHtml(artifactKind(file))}</span>
+        </button>
+      `).join("");
+      return files;
+    }
+
+    async function openArtifact(path) {
+      if (!state.projectId) return;
+      els.previewTitle.textContent = path.split("/").pop() || path;
+      els.previewMeta.textContent = path;
+      els.preview.classList.remove("preview-svg");
+      els.preview.textContent = "正在加载...";
+
+      try {
+        const response = await fetch(`/api/projects/${state.projectId}/files/${path}`);
+        if (!response.ok) throw new Error(response.statusText);
+        const text = await response.text();
+        if (path.endsWith(".svg")) {
+          els.preview.classList.add("preview-svg");
+          els.preview.innerHTML = text;
+        } else {
+          els.preview.textContent = text;
+        }
+      } catch (error) {
+        els.preview.classList.remove("preview-svg");
+        els.preview.textContent = `读取文件失败：${error.message}`;
+      }
+    }
+
+    function resetUi() {
+      closeEventSource();
+      state.projectId = null;
+      state.jobId = null;
+      state.events = [];
+      state.failed = false;
+      setBusy(false);
+      setProgress(0, "就绪");
+      els.projectMeta.textContent = "未创建项目";
+      els.jobMeta.textContent = "空闲";
+      els.events.innerHTML = '<div class="empty">暂无事件。</div>';
+      els.eventCount.textContent = "0 条事件";
+      els.artifacts.innerHTML = '<div class="empty">生成的 RTL、testbench、网表和报告会显示在这里。</div>';
+      els.previewTitle.textContent = "预览";
+      els.previewMeta.textContent = "未选择文件";
+      els.preview.textContent = "请选择一个产物以预览内容。";
+      els.preview.classList.remove("preview-svg");
+    }
+
+    els.form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      startDesign();
+    });
+    els.simulateBtn.addEventListener("click", runCurrentArtifacts);
+    els.resetBtn.addEventListener("click", resetUi);
+    els.refreshArtifacts.addEventListener("click", () => loadArtifacts(false));
+    els.artifacts.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-path]");
+      if (button) openArtifact(button.dataset.path);
+    });
+
+    loadHealth();
+  </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+/target/
+/workspaces/*
+!/workspaces/.gitkeep
+/config/mcp.json
+/.env
+/web-api.log
+/web-api.err
